@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المرقاة — Complete Trainer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap');
+  :root {
+    --ink:#1a1209;--parchment:#f5f0e8;--parchment-dark:#ede5d0;
+    --red:#8b1a1a;--gold:#b8860b;--gold-light:#d4a017;
+    --green:#2d5a27;--border:#c9a96e;--shadow:rgba(26,18,9,0.15);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--ink);font-family:'Lato',sans-serif;color:var(--ink);min-height:100vh;}
+  .app{max-width:700px;margin:0 auto;padding:20px 16px 40px;}
+  .header{text-align:center;padding:28px 20px 20px;background:var(--parchment);border:2px solid var(--border);border-radius:4px;margin-bottom:16px;position:relative;}
+  .header::before,.header::after{content:'❧';color:var(--red);font-size:18px;position:absolute;top:10px;}
+  .header::before{left:14px;}.header::after{right:14px;}
+  .header h1{font-family:'Amiri',serif;font-size:26px;color:var(--red);letter-spacing:1px;}
+  .header .subtitle{font-size:13px;color:#6b5a3a;margin-top:4px;letter-spacing:2px;text-transform:uppercase;}
+  .mode-bar{display:flex;gap:8px;margin-bottom:14px;}
+  .mode-btn{flex:1;padding:10px 6px;border:2px solid var(--border);background:var(--parchment-dark);color:#6b5a3a;font-family:'Lato',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:3px;transition:all 0.2s;}
+  .mode-btn.active{background:var(--red);border-color:var(--red);color:var(--parchment);}
+  .mode-btn:hover:not(.active){border-color:var(--red);color:var(--red);}
+  .progress-bar-wrap{background:var(--parchment-dark);border:1px solid var(--border);border-radius:3px;height:8px;margin-bottom:10px;overflow:hidden;}
+  .progress-bar-fill{height:100%;background:var(--gold);transition:width 0.4s ease;}
+  .progress-label{font-size:11px;color:#b8a88a;text-align:right;margin-bottom:14px;letter-spacing:1px;}
+  .card{background:var(--parchment);border:2px solid var(--border);border-radius:4px;padding:24px 20px;margin-bottom:14px;}
+  .topic-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--parchment);background:var(--red);padding:3px 10px;border-radius:2px;margin-bottom:14px;}
+  .arabic-text{font-family:'Amiri',serif;font-size:20px;color:var(--ink);line-height:1.8;text-align:right;direction:rtl;border-right:3px solid var(--gold);padding:12px 14px 12px 10px;margin-bottom:16px;background:var(--parchment-dark);border-radius:3px;}
+  .question-text{font-size:17px;font-weight:700;color:var(--ink);line-height:1.5;margin-bottom:18px;}
+  .options{display:flex;flex-direction:column;gap:10px;}
+  .option-btn{padding:13px 16px;border:2px solid var(--border);background:white;color:var(--ink);font-family:'Lato',sans-serif;font-size:14px;text-align:left;cursor:pointer;border-radius:3px;transition:all 0.2s;line-height:1.4;}
+  .option-btn:hover:not(:disabled){border-color:var(--gold);background:rgba(184,134,11,0.06);}
+  .option-btn.correct{border-color:var(--green);background:rgba(45,90,39,0.08);color:var(--green);font-weight:700;}
+  .option-btn.wrong{border-color:var(--red);background:rgba(139,26,26,0.07);color:var(--red);}
+  .option-btn:disabled{cursor:default;}
+  .option-btn .ar{font-family:'Amiri',serif;font-size:17px;direction:rtl;display:block;text-align:right;margin-bottom:2px;}
+  .option-btn .en{font-size:12px;color:#8b7355;display:block;}
+  .feedback{margin-top:16px;padding:14px 16px;border-radius:3px;font-size:14px;line-height:1.6;display:none;}
+  .feedback.show{display:block;}
+  .feedback.correct-fb{background:rgba(45,90,39,0.09);border:1px solid var(--green);color:#1a3d17;}
+  .feedback.wrong-fb{background:rgba(139,26,26,0.07);border:1px solid var(--red);color:#5a0d0d;}
+  .feedback .fb-title{font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+  .feedback .sharh-explain{margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.1);font-style:italic;color:#5a4a2a;}
+  .next-btn{width:100%;padding:14px;background:var(--red);color:var(--parchment);border:none;font-family:'Lato',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:3px;margin-top:14px;display:none;transition:background 0.2s;}
+  .next-btn:hover{background:#6b1212;}
+  .next-btn.show{display:block;}
+  .score-display{display:flex;gap:10px;margin-bottom:14px;}
+  .score-box{flex:1;background:var(--parchment);border:1px solid var(--border);padding:10px;text-align:center;border-radius:3px;}
+  .score-box .num{font-size:24px;font-weight:700;color:var(--red);font-family:'Amiri',serif;}
+  .score-box .lbl{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#8b7355;}
+  .results-card{background:var(--parchment);border:2px solid var(--gold);border-radius:4px;padding:32px 24px;text-align:center;}
+  .results-card .final-pct{font-size:56px;font-weight:700;color:var(--red);font-family:'Amiri',serif;}
+  .results-card .result-msg{font-size:15px;color:#3a2a10;margin:12px 0 20px;line-height:1.6;}
+  .restart-btn{padding:12px 28px;background:var(--red);color:var(--parchment);border:none;font-family:'Lato',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:3px;}
+  .fc-card{background:var(--parchment);border:2px solid var(--border);border-radius:4px;padding:28px 20px;min-height:200px;cursor:pointer;text-align:center;margin-bottom:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+  .fc-nav{display:flex;gap:10px;margin-bottom:14px;}
+  .fc-nav button{flex:1;padding:11px;border:2px solid var(--border);background:var(--parchment-dark);color:#6b5a3a;font-family:'Lato',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+  .fc-nav button:hover{border-color:var(--red);color:var(--red);}
+  .fc-label{font-size:11px;color:#b8a88a;text-align:center;margin-bottom:10px;letter-spacing:1px;}
+  .ref-section{background:var(--parchment);border:2px solid var(--border);border-radius:4px;margin-bottom:12px;overflow:hidden;}
+  .ref-header{background:var(--red);color:var(--parchment);padding:12px 16px;font-weight:700;font-size:14px;letter-spacing:1px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+  .ref-header .ar-title{font-family:'Amiri',serif;font-size:17px;}
+  .ref-body{padding:16px;display:none;border-top:1px solid var(--border);}
+  .ref-body.open{display:block;}
+  .ref-body p{font-size:13px;line-height:1.7;margin-bottom:10px;color:#3a2a10;}
+  .ref-body .def-arabic{font-family:'Amiri',serif;font-size:18px;direction:rtl;text-align:right;color:var(--red);background:var(--parchment-dark);padding:8px 12px;border-radius:3px;margin:8px 0;display:block;}
+  .ref-body .example{background:rgba(184,134,11,0.08);border-left:3px solid var(--gold);padding:8px 12px;font-size:13px;margin:8px 0;border-radius:0 3px 3px 0;}
+  .ref-body table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;}
+  .ref-body th{background:var(--parchment-dark);padding:7px 10px;text-align:left;border:1px solid var(--border);font-weight:700;color:var(--red);}
+  .ref-body td{padding:7px 10px;border:1px solid var(--border);color:#3a2a10;}
+  .ref-body td .ar-cell{font-family:'Amiri',serif;font-size:16px;direction:rtl;}
+  .hidden{display:none!important;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>المرقاة</h1>
+    <div class="subtitle">Complete Trainer — All 91 Pages</div>
+  </div>
+
+  <div class="mode-bar">
+    <button class="mode-btn active" onclick="setMode('quiz',this)">Quiz</button>
+    <button class="mode-btn" onclick="setMode('flashcard',this)">Flashcards</button>
+    <button class="mode-btn" onclick="setMode('reference',this)">Reference</button>
+  </div>
+
+  <div class="score-display" id="scoreDisplay">
+    <div class="score-box"><div class="num" id="scoreCorrect">0</div><div class="lbl">Correct</div></div>
+    <div class="score-box"><div class="num" id="scoreWrong">0</div><div class="lbl">Wrong</div></div>
+    <div class="score-box"><div class="num" id="scoreLeft">0</div><div class="lbl">Remaining</div></div>
+  </div>
+
+  <div id="progressWrap" class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill"></div></div>
+  <div id="progressLabel" class="progress-label"></div>
+
+  <div id="quizSection">
+    <div class="card">
+      <span class="topic-tag" id="topicTag"></span>
+      <div class="arabic-text" id="arabicText"></div>
+      <div class="question-text" id="questionText"></div>
+      <div class="options" id="optionsContainer"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question →</button>
+  </div>
+
+  <div id="flashcardSection" class="hidden">
+    <div class="fc-label" id="fcLabel"></div>
+    <div class="card fc-card" onclick="flipCard()">
+      <span class="topic-tag" id="fcTag"></span>
+      <div id="fcFront"></div>
+      <div id="fcBack" class="hidden"></div>
+    </div>
+    <div class="fc-nav">
+      <button onclick="fcPrev()">← Previous</button>
+      <button onclick="fcNext()">Next →</button>
+    </div>
+  </div>
+
+  <div id="referenceSection" class="hidden"></div>
+
+  <div id="resultsSection" class="hidden">
+    <div class="results-card">
+      <div class="final-pct" id="finalScore"></div>
+      <div class="result-msg" id="resultMsg"></div>
+      <button class="restart-btn" onclick="restartQuiz()">Restart Quiz</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {topic:'علم — Knowledge',arabic:'العلم يُطلق على معانٍ: أحدها حصول صورة الشيء في العقل',
+   question:'According to the Mirqaat, how many meanings does the word "علم" (knowledge/science) carry?',
+   options:[{text:'Two'},{text:'Three'},{text:'Four'},{text:'Five',ar:'خمسة'}],correct:3,
+   sharh:'The text lists five meanings: (1) حصول صورة الشيء في العقل (form of a thing occurring in the intellect), (2) الصورة الحاصلة (the resulting form itself), (3) الحاضر عند المدرك (what is present to the perceiver), (4) قبول النفس لتلك الصورة (the soul receiving that form — attributed to the Mutakallimun), (5) الإضافة الحاصلة بين العالم والمعلوم (the relation between knower and known).'},
+  {topic:'علم — Knowledge',arabic:'',
+   question:'Which definition of علم is attributed to جمهور المتكلمين (majority of theologians)?',
+   options:[{text:'Knowledge as the form of a thing in the intellect'},{text:'Knowledge as the actual presence of a thing before the perceiver'},{text:'Knowledge as the soul\'s reception of that form',ar:'قبول النفس'},{text:'Knowledge as the relation between knower and known'}],correct:2,
+   sharh:'The fourth meaning — قبول النفس لتلك الصورة (the soul\'s reception of that form) — is specifically attributed in the footnotes to جمهور المتكلمين.'},
+  {topic:'علم — Division',arabic:'العلم ينقسم على قسمين: التصوُّر والتصديق',
+   question:'Into what two primary divisions does العلم divide?',
+   options:[{text:'البديهي والنظري (self-evident and theoretical)'},{text:'التصوُّر والتصديق (concept and assent)',ar:'تصوُّر وتصديق'},{text:'الحضوري والحصولي (presence-knowledge and acquired knowledge)'},{text:'اليقين والظن (certainty and supposition)'}],correct:1,
+   sharh:'العلم الذي هو المقسَّم (the knowledge being divided) divides into تصوُّر and تصديق. تصوُّر is الإدراك الخالي عن الحكم (perception without judgement), while تصديق is the judgement/assent. This is foundational to all of علم الميزان.'},
+  {topic:'التصوُّر والتصديق',arabic:'التصوُّر: الإدراك الخالي عن الحكم',
+   question:'What is التصوُّر according to the Mirqaat?',
+   options:[{text:'Perception that includes a judgement'},{text:'Perception free from judgement (no affirmation or negation)',ar:'إدراك خالٍ من الحكم'},{text:'Assenting to a proposition'},{text:'The relation between a subject and predicate'}],correct:1,
+   sharh:'التصوُّر is defined as الإدراك الخالي عن الحكم — pure conceptual grasp without any affirmation or negation. Example: grasping the concept of زيد or of قيام without yet asserting anything.'},
+  {topic:'التصوُّر والتصديق',arabic:'التصديق: الحكم المقارِن للثلاثة',
+   question:'According to the Mirqaat, التصديق (assent) requires three prior تصوُّرات. What are the three?',
+   options:[{text:'Subject, predicate, and the copula (نسبة)'},{text:'Major premise, minor premise, and conclusion'},{text:'Form, matter, and substance'},{text:'Universal, particular, and singular'}],correct:0,
+   sharh:'The three تصوُّرات necessary for تصديق are: (1) تصوُّر المحكوم عليه (subject), (2) تصوُّر المحكوم به (predicate), (3) إدراك النسبة الحكمية المسمى بالحكم (grasping the relational bond called الحكم). These three are the building blocks of every proposition.'},
+  {topic:'التصوُّر والتصديق',arabic:'الإمام الرازي: التصديق = مجموع الإدراكات الثلاثة',
+   question:'How does Imam al-Razi differ from the Hukama (philosophers) on the definition of تصديق?',
+   options:[{text:'Al-Razi says تصديق is simply the نسبة رابطية; philosophers agree'},{text:'Al-Razi says تصديق is the sum of all three perceptions (تصوُّر + تصوُّر + نسبة); philosophers say it is only the رابطي نسبة',ar:'مجموع الإدراكات الثلاثة'},{text:'Al-Razi denies that تصديق requires تصوُّر at all'},{text:'Al-Razi limits تصديق to برهاني arguments only'}],correct:1,
+   sharh:'الحكماء say تصديق = إدراك النسبة الرابطية only. الإمام الرازي says تصديق = مجموع the three perceptions — subjects, predicate, AND the نسبة حكمية.'},
+  {topic:'التصوُّر — أقسام',arabic:'التصوُّر: ضروري ونظري',
+   question:'What is the difference between التصوُّر الضروري and التصوُّر النظري?',
+   options:[{text:'Ḍarūrī comes from sense perception; naẓarī from reason alone'},{text:'Ḍarūrī is obtained without effort (e.g. heat/cold); naẓarī requires thinking and effort (e.g. jinn and angels)',ar:'ضروري: بلا كسب — نظري: يحتاج إلى فكر'},{text:'Ḍarūrī is universal; naẓarī is particular'},{text:'Ḍarūrī pertains to الجواهر; naẓarī pertains to الأعراض'}],correct:1,
+   sharh:'التصوُّر الضروري = obtained without effort, like تصوُّرنا الحرارةَ والبرودة. التصوُّر النظري = requires فكر ونظر, like تصوُّر الجن والملائكة which needs تجشُّم (exertion).'},
+  {topic:'الدلالة — Signification',arabic:'الدلالة: كون الشيء بحيث يلزم من العلم به العلم بشيء آخر',
+   question:'How does the Mirqaat define الدلالة (signification) technically?',
+   options:[{text:'A word\'s phonetic form pointing to a meaning'},{text:'A state such that knowing one thing necessitates knowing another thing',ar:'كون الشيء يلزم منه العلم بشيء آخر'},{text:'The placement of a word by a language authority'},{text:'The mind\'s direct encounter with external reality'}],correct:1,
+   sharh:'الدلالة in technical usage = كون الشيء بحيث يلزم من العلم به العلم بشيء آخر — the state of a thing such that knowledge of it necessitates knowledge of something else.'},
+  {topic:'الدلالة — أقسام',arabic:'الدلالة: لفظية وغير لفظية',
+   question:'The Mirqaat divides الدلالة into لفظية and غير لفظية, then each into three sub-types. Which of these is NOT one of the six types?',
+   options:[{text:'اللفظية الوضعية (conventional-verbal)'},{text:'اللفظية الطبعية (natural-verbal)'},{text:'غير اللفظية العقلية (rational-non-verbal)'},{text:'اللفظية المجازية (metaphorical-verbal)',ar:'لفظية مجازية'}],correct:3,
+   sharh:'The six دلالات are verbal: وضعية, طبعية, عقلية — and non-verbal: وضعية, طبعية, عقلية. There is no separate category of مجازية as a primary division.'},
+  {topic:'الدلالة اللفظية الوضعية — أقسام',arabic:'الدلالة: مطابقة، تضمُّن، التزام',
+   question:'What is الدلالة التضمُّنية?',
+   options:[{text:'A word indicating its full designated meaning'},{text:'A word indicating only part of its designated meaning',ar:'دلالة اللفظ على جزء معناه الموضوع له'},{text:'A word indicating an external concomitant of its meaning'},{text:'A word indicating meaning through natural instinct'}],correct:1,
+   sharh:'(1) المطابقة — full موضوع له. (2) التضمُّن — part of موضوع له (e.g. "إنسان" indicating only حيوان). (3) الالتزام — something outside the موضوع له that the mind necessarily moves to.'},
+  {topic:'الدلالة الالتزامية',arabic:'الالتزامية: لا يدل اللفظ على الموضوع له ولا جزئه، بل على لازمه',
+   question:'For الدلالة الالتزامية to be valid in logic, what condition must be met for the لازم (concomitant)?',
+   options:[{text:'The لازم must be external to the concept'},{text:'The لازم must be the most well-known aspect of the thing'},{text:'The لازم must be بيِّن (clear/manifest) — the mind moves to it readily from grasping the معنى',ar:'لازم بيِّن'},{text:'The لازم must always be a material attribute'}],correct:2,
+   sharh:'الالتزام الذي يُعتبر في المنطق هو اللازم البيِّن — the manifest concomitant, meaning the mind readily moves from knowing the ملزوم to the لازم. Non-manifest لازم is not used in الدلالة الالتزامية.'},
+  {topic:'دلالة — مفرد ومركب',arabic:'اللفظ: إما مفرد وإما مركب',
+   question:'How does علم الميزان define المفرد (simple term) as distinct from المركب?',
+   options:[{text:'A term consisting of one letter'},{text:'A term whose parts do NOT each independently indicate part of the whole meaning',ar:'ما لا يقصد بجزئه الدلالة على جزء معناه'},{text:'A term consisting of only a noun (اسم)'},{text:'A term that cannot be negated'}],correct:1,
+   sharh:'المفرد = اللفظ الذي لا يُقصد بجزئه الدلالة على جزء معناه. E.g. "زيد" — the زاء does not independently signify part of the meaning. المركب = what is composed such that its parts DO indicate parts of the meaning.'},
+  {topic:'دلالة — الحقيقة والمجاز',arabic:'الحقيقة: اللفظ المستعمَل في موضوعه الأصلي',
+   question:'What distinguishes الحقيقة from المجاز?',
+   options:[{text:'الحقيقة uses a word in its original placement (موضوع له أصلًا); مجاز uses it beyond that placement with a قرينة (contextual indicator)',ar:'حقيقة: موضعه الأصلي — مجاز: بقرينة'},{text:'الحقيقة is always literal in all contexts; مجاز is only used in poetry'},{text:'الحقيقة is the اسم; مجاز is the فعل'},{text:'حقيقة refers to divine realities; مجاز to human constructs'}],correct:0,
+   sharh:'الحقيقة = اللفظ المستعمَل في موضوعه الأصلي. المجاز = اللفظ المتجاوَز عن موضوعه الأصلي WITH a قرينة. علامة الحقيقة: تبادر الذهن بلا قرينة. علامة المجاز: صحة نفيه.'},
+  {topic:'دلالة — المشترك والمرادف',arabic:'المشترك: لفظ وُضع لمعنيين أو أكثر',
+   question:'What is اللفظ المشترك (homonymous/polysemous word)?',
+   options:[{text:'A word with one meaning shared by many referents (universal term)'},{text:'A word assigned originally to one meaning and transferred to another (منقول)'},{text:'A word established for each of multiple meanings separately — multiple اوضاع',ar:'وُضع لكل معنى وضعًا مستقلًا'},{text:'A word used metaphorically across all its uses'}],correct:2,
+   sharh:'المشترك اللفظي = اللفظ الذي وُضع لكل معنى من معانيه وضعًا مستقلًا ابتداءً — each meaning has its own separate وضع. E.g. "عين" for water-source, sun, eye, etc.'},
+  {topic:'دلالة — المنقول',arabic:'المنقول: نُقل من معناه الأول إلى معنى ثانٍ',
+   question:'The Mirqaat divides المنقول into three types. Which of these is one of them?',
+   options:[{text:'المنقول الذاتي'},{text:'المنقول العرفي (by common custom), المنقول الشرعي (by Sharia), المنقول الاصطلاحي (by specialist convention)',ar:'عرفي، شرعي، اصطلاحي'},{text:'المنقول المجازي والمنقول الحقيقي'},{text:'المنقول الشعري فقط'}],correct:1,
+   sharh:'Three types: (1) العرفي العام — transferred by general usage (e.g. الدابة → horse). (2) الشرعي — transferred by Sharia (e.g. الصلاة → specific pillars). (3) الاصطلاحي — transferred by specialists (e.g. الاسم in grammar).'},
+  {topic:'الكليات الخمس — Overview',arabic:'الكليات خمس: الجنس، النوع، الفصل، الخاصة، العرض العام',
+   question:'What are the الكليات الخمس (five universals)?',
+   options:[{text:'الجوهر، الكم، الكيف، الإضافة، والوضع'},{text:'الجنس، النوع، الفصل، الخاصة، العرض العام',ar:'جنس، نوع، فصل، خاصة، عرض عام'},{text:'اليقين، الظن، الشك، الوهم، والجهل'},{text:'الموجبة الكلية، السالبة الكلية، الموجبة الجزئية، السالبة الجزئية، والشخصية'}],correct:1,
+   sharh:'(1) الجنس — genus (e.g. الحيوان). (2) النوع — species (e.g. الإنسان). (3) الفصل — differentia (e.g. الناطق). (4) الخاصة — proprium (e.g. الضاحك). (5) العرض العام — general accident (e.g. الماشي).'},
+  {topic:'الجنس',arabic:'الجنس: كلي مقول على كثيرين مختلفين بالحقائق في جواب ما هو',
+   question:'What makes الجنس (genus) different from النوع (species)?',
+   options:[{text:'الجنس applies to one reality; نوع to many'},{text:'الجنس is predicated of many things differing in their حقائق (realities); نوع is predicated of many agreeing in their حقائق',ar:'جنس: مختلفو الحقائق — نوع: متفقو الحقائق'},{text:'الجنس is always the highest category; نوع is always the lowest'},{text:'الجنس answers "ما هو في ذاته"; نوع answers "أي شيء"'}],correct:1,
+   sharh:'الجنس = كلي مقول على كثيرين مختلفين بالحقائق — e.g. الحيوان said of إنسان, فرس, غنم (differing realities). النوع = كلي مقول على كثيرين متفقين بالحقائق — e.g. إنسان said of زيد, عمرو (same reality).'},
+  {topic:'الفصل',arabic:'الفصل: كلي مقول على الشيء في جواب أي شيء هو في ذاته',
+   question:'What is the role of الفصل (differentia) in a حد تام (complete definition)?',
+   options:[{text:'It replaces the genus entirely'},{text:'It distinguishes (يُفرِّق) the species from other species under the same genus — e.g. الناطق distinguishes إنسان from other حيوانات',ar:'يُفرِّق النوع عن غيره تحت الجنس'},{text:'It indicates accidental properties shared by all individuals'},{text:'It is identical to the خاصة and can substitute for it'}],correct:1,
+   sharh:'الفصل القريب = what distinguishes the species from siblings under the same genus, e.g. الناطق for إنسان under الحيوان. Together, الجنس القريب + الفصل القريب = الحد التام.'},
+  {topic:'الخاصة',arabic:'الخاصة: كلي خارج عن حقيقة الأفراد، محمول عليها واقعة تحت حقيقة واحدة',
+   question:'How does الخاصة (proprium) differ from العرض العام (general accident)?',
+   options:[{text:'الخاصة is predicated of the species only (واقعة تحت حقيقة واحدة); العرض عام is predicated of individuals under more than one reality',ar:'خاصة: حقيقة واحدة — عرض عام: حقائق متعددة'},{text:'الخاصة is always necessary; العرض عام is always contingent'},{text:'الخاصة is the same as الفصل'},{text:'الخاصة is part of the definition; العرض عام is not'}],correct:0,
+   sharh:'الخاصة: applies to ONE species only — e.g. الضاحك only for إنسان. العرض العام: applies to MULTIPLE species — e.g. الماشي applies to إنسان and فرس and others.'},
+  {topic:'الكلي — أقسام',arabic:'الكلي: جزئي وكلي',
+   question:'What is the الجزئي (particular) as described in the Mirqaat?',
+   options:[{text:'A universal that applies to individuals of exactly one species'},{text:'A concept whose very notion prevents predication of many',ar:'ما يمنع نفس تصوُّره عن وقوع الشركة فيه'},{text:'A universal that exists in only one instance in reality'},{text:'A universal that is part of the genus but not the species'}],correct:1,
+   sharh:'الجزئي = ما يمنع نفس تصوُّره عن الصدق على كثيرين — its very concept prevents it from applying to many, like زيد or هذا الفرس. الكلي = ما لا يمنع نفس تصوُّره — nothing in its concept prevents applying to many, like الإنسان.'},
+  {topic:'الكلي — أقسام الوجود',arabic:'الكلي: ما يمتنع وجود أفراده — ما يمكن — ما وُجد فرد واحد — ما وُجد كثيرة',
+   question:'Which type of كلي is described as "ما يمكن أن توجد أفراده ولم توجد كالعنقاء"?',
+   options:[{text:'The second type — ممكن الأفراد but nonexistent (لم يوجد)',ar:'ممكن لم يوجد'},{text:'The first type — impossible to have individuals (ممتنع الأفراد)'},{text:'The fourth type — existing with many individuals'},{text:'The third type — existing with only one individual'}],correct:0,
+   sharh:'Four types by وجود: (1) Impossible individuals. (2) Possible but nonexistent — كالعنقاء (mythical bird). (3) Possible but only one individual — كالشمس. (4) Existing with many individuals — كالإنسان والكواكب.'},
+  {topic:'النسب بين الكليين',arabic:'النسب بين الكليين أربع: التساوي، التباين، العموم والخصوص مطلقاً، العموم والخصوص من وجه',
+   question:'What are the four possible relationships between two universals?',
+   options:[{text:'Entailment, contradiction, overlap, identity'},{text:'التساوي (equality), التباين (complete disjunction), العموم والخصوص مطلقاً (one-way inclusion), العموم والخصوص من وجه (partial overlap)',ar:'تساوٍ، تباين، عموم وخصوص مطلقاً، عموم وخصوص من وجه'},{text:'الجنسية، النوعية، الفصلية، والعرضية'},{text:'الحمل، الصدق، الإطلاق، والتقييد'}],correct:1,
+   sharh:'(1) التساوي: e.g. الإنسان/الناطق. (2) التباين: e.g. الإنسان/الفرس. (3) عموم وخصوص مطلقاً: e.g. الحيوان/الإنسان. (4) عموم وخصوص من وجه: e.g. الأبيض/الحيوان (البط is both; ثلج is white not animal; فيل is animal not white).'},
+  {topic:'التعريفات — Definitions',arabic:'معرِّف الشيء: ما يحمل عليه لإفادة تصوُّره',
+   question:'What are the four types of definitions (تعريفات) according to the Mirqaat?',
+   options:[{text:'الحد، الرسم، القياس، والاستقراء'},{text:'الحد التام، الحد الناقص، الرسم التام، الرسم الناقص',ar:'حد تام، حد ناقص، رسم تام، رسم ناقص'},{text:'الجامع، المانع، البيّن، والخفي'},{text:'اليقيني، الظني، المشهور، والمصادرة'}],correct:1,
+   sharh:'(1) الحد التام: جنس قريب + فصل قريب. (2) الحد الناقص: فصل alone or جنس بعيد + فصل. (3) الرسم التام: جنس قريب + خاصة. (4) الرسم الناقص: خاصة alone or جنس بعيد + خاصة. العرض عام alone is NOT a valid definition.'},
+  {topic:'الحد التام',arabic:'الحد التام: الجنس القريب والفصل القريب',
+   question:'Why is العرض العام (general accident) alone insufficient for a تعريف (definition)?',
+   options:[{text:'Because it is too difficult to identify'},{text:'Because it does not uniquely distinguish the definiendum — لا يفيد التمييز',ar:'لأنه لا يفيد التمييز'},{text:'Because it is not a كلي at all'},{text:'Because it changes over time and is unreliable'}],correct:1,
+   sharh:'A valid definition must يفيد التمييز — uniquely pick out the thing defined. العرض العام applies to more than one حقيقة (e.g. الماشي applies to humans and horses), so using it alone fails to exclude other species.'},
+  {topic:'القضايا — Propositions',arabic:'القضية: قول يحتمل الصدق والكذب',
+   question:'What is the definition of القضية (proposition) in the Mirqaat?',
+   options:[{text:'Any utterance regardless of truth value'},{text:'A question posed to elicit knowledge'},{text:'A statement that admits of being true or false',ar:'قول يحتمل الصدق والكذب'},{text:'A command directing an action'}],correct:2,
+   sharh:'القضية = قول يحتمل الصدق والكذب — a statement capable of being true or false. It divides into حملية (categorical) and شرطية (conditional).'},
+  {topic:'القضايا — أقسام',arabic:'الحملية والشرطية',
+   question:'What is القضية الشرطية, and what is it called when the ruling is based on a necessary connection (لزوم)?',
+   options:[{text:'A conditional proposition; when based on لزوم it is called متصلة لزومية'},{text:'A categorical proposition with a subject and predicate'},{text:'A proposition about future events only'},{text:'A proposition that denies a predicate'}],correct:0,
+   sharh:'القضية الشرطية contains a conditional/disjunctive structure — either متصلة (if…then) or منفصلة (either…or). A متصلة is لزومية when the connection between مقدم and تالي is a necessary (لزوم) relation.'},
+  {topic:'القضايا الحملية — أجزاء',arabic:'الحملية: موضوع، محمول، رابطة',
+   question:'In the proposition "زيد قائم", identify the three components correctly:',
+   options:[{text:'زيد = محمول, قائم = موضوع, الـهو = رابطة'},{text:'زيد = موضوع (subject), قائم = محمول (predicate), الرابطة (copula) is deleted in Arabic but intended',ar:'زيد: موضوع — قائم: محمول — الرابطة محذوفة'},{text:'زيد = مقدم, قائم = تالي, with no رابطة'},{text:'All three are موضوع without محمول'}],correct:1,
+   sharh:'الحملية has three parts: (1) الموضوع = المحكوم عليه = "زيد". (2) المحمول = المحكوم به = "قائم". (3) الرابطة = "هو" — often deleted in Arabic but intended.'},
+  {topic:'القضايا الحملية — الكمية',arabic:'المحصورة: موجبة كلية، سالبة كلية، موجبة جزئية، سالبة جزئية',
+   question:'What are the four المحصورات (quantified propositions)?',
+   options:[{text:'Ḍarūrī, waṣfī, waṭanī, and muntashira'},{text:'Kullī mūjiba, kullī sāliba, juz\'ī mūjiba, juz\'ī sāliba',ar:'كلية موجبة، كلية سالبة، جزئية موجبة، جزئية سالبة'},{text:'Shakhṣiyya, kulliyya, juz\'iyya, and muhmalah'},{text:'Luzūmiyya, itifāqiyya, anādiyya, and wāq\'iyya'}],correct:1,
+   sharh:'(1) الموجبة الكلية — "كل إنسان حيوان". (2) السالبة الكلية — "لا شيء من الإنسان بحجر". (3) الموجبة الجزئية — "بعض الحيوان إنسان". (4) السالبة الجزئية — "ليس بعض الإنسان بأسود".'},
+  {topic:'القضايا — الجهة',arabic:'الجهة: الضرورية، الدائمة، المشروطة، العرفية، الوقتية، المنتشرة، المطلقة، الممكنة',
+   question:'How many بسائط (simple modal propositions) does the Mirqaat enumerate?',
+   options:[{text:'Five'},{text:'Six'},{text:'Seven'},{text:'Eight',ar:'ثمانية'}],correct:3,
+   sharh:'Eight simple modals: (1) الضرورية المطلقة, (2) الدائمة المطلقة, (3) المشروطة العامة, (4) العرفية العامة, (5) الوقتية المطلقة, (6) المنتشرة المطلقة, (7) المطلقة العامة, (8) الممكنة العامة. Then seven مركبات, totaling fifteen modal types.'},
+  {topic:'القضايا — التناقض',arabic:'التناقض: اختلاف القضيتين بالإيجاب والسلب',
+   question:'How many وحدات (unities) does the Mirqaat require for genuine تناقض (contradiction)?',
+   options:[{text:'Four'},{text:'Six'},{text:'Eight — وحدة الموضوع، المحمول، المكان، الزمان، القوة والفعل، الشرط، الجزء والكل، والإضافة',ar:'ثمانية وحدات'},{text:'Two — subject and predicate only'}],correct:2,
+   sharh:'Real تناقض requires eight وحدات: الموضوع, المحمول, المكان, الزمان, القوة والفعل, الشرط, الجزء والكل, الإضافة. Without all eight, two seemingly contradictory propositions may both be true or both be false.'},
+  {topic:'التناقض — شروط الكم',arabic:'لابد في التناقض من اختلاف الكم',
+   question:'Why must the two contradictory propositions differ in الكم (quantity)?',
+   options:[{text:'Because two universals can both be true at the same time'},{text:'Because the two كليتين may both be false',ar:'لأن الكليتين قد تكذبان'},{text:'Because quantity determines the subject'},{text:'Because كم is a necessary part of all modals'}],correct:1,
+   sharh:'If both propositions are كلية, they may both be false. Therefore for genuine تناقض, one must be كلية and the other جزئية — ensuring that the truth of one necessitates the falsity of the other.'},
+  {topic:'العكس المستوي',arabic:'العكس المستوي: جعل الجزء الأول من القضية ثانياً والثاني أولاً',
+   question:'When a universal affirmative (كلية موجبة) is converted (عكس مستوي), what is the result?',
+   options:[{text:'Another universal affirmative'},{text:'A particular affirmative (موجبة جزئية)',ar:'موجبة جزئية'},{text:'A universal negative'},{text:'A particular negative'}],correct:1,
+   sharh:'"كل إنسان حيوان" converts to "بعض الحيوان إنسان" (not كلية). Rules: كلية سالبة ↔ كلية سالبة; موجبة كلية → جزئية موجبة; جزئية موجبة → جزئية موجبة; جزئية سالبة → no valid converse.'},
+  {topic:'القياس الاقتراني — الأشكال',arabic:'القياس الاقتراني: صغرى وكبرى، والأوسط يتكرر',
+   question:'In the first figure (الشكل الأول) of categorical syllogism, how is the middle term (الأوسط) positioned?',
+   options:[{text:'Subject in both premises'},{text:'Predicate in both premises'},{text:'Subject in the minor (صغرى) and predicate in the major (كبرى)',ar:'موضوع في الصغرى، محمول في الكبرى'},{text:'Predicate in the minor and subject in the major'}],correct:2,
+   sharh:'الشكل الأول: الأوسط موضوعٌ في الصغرى ومحمولٌ في الكبرى. This is the most noble (أشرف) of the four figures because the conclusion follows naturally.'},
+  {topic:'القياس — الشكل الأول',arabic:'الشكل الأول: أشرف الأشكال وأنتجها بداهةً',
+   question:'What are the two essential conditions (شرائط) for the first figure to yield a valid conclusion?',
+   options:[{text:'Both premises must be affirmative'},{text:'(1) The minor premise must be affirmative (إيجاب الصغرى); (2) The major premise must be universal (كلية الكبرى)',ar:'إيجاب الصغرى وكلية الكبرى'},{text:'Both premises must be negative'},{text:'One premise must be modal and the other assertoric'}],correct:1,
+   sharh:'Conditions of الشكل الأول: (1) إيجاب الصغرى — minor must be affirmative. (2) كلية الكبرى — major must be universal. If either fails, no conclusion follows.'},
+  {topic:'القياس — الشكل الثاني',arabic:'الشكل الثاني: الأوسط محمول في الصغرى والكبرى',
+   question:'What is the essential condition for the second figure?',
+   options:[{text:'Both premises affirmative'},{text:'Differ in quality (كيف) — one must be affirmative, one negative; and كلية الكبرى',ar:'اختلاف المقدمتين في الكيف وكلية الكبرى'},{text:'Both premises must be universal'},{text:'The minor must be negative and major affirmative only'}],correct:1,
+   sharh:'الشكل الثاني: الأوسط is predicate in both premises. Condition: اختلاف المقدمتين في الكيف + كلية الكبرى. Result is always سالبة.'},
+  {topic:'القياس — الشكل الثالث',arabic:'الشكل الثالث: الأوسط موضوع في الصغرى والكبرى',
+   question:'What condition must hold for the third figure?',
+   options:[{text:'كلية الصغرى وإيجاب الكبرى'},{text:'إيجاب الصغرى وكلية الكبرى'},{text:'إيجاب الصغرى (minor affirmative) and كلية الصغرى (minor universal)',ar:'إيجاب الصغرى وكليتها'},{text:'Both premises must be universal'}],correct:2,
+   sharh:'الشكل الثالث: الأوسط is subject in both premises. Conditions: (1) إيجاب الصغرى, (2) كلية الصغرى. The conclusion is always جزئية.'},
+  {topic:'القياس الاستثنائي',arabic:'القياس الاستثنائي: مركب من متصلة أو منفصلة واستثناء',
+   question:'In a متصلة لزومية (necessary conditional syllogism), what can be validly inferred?',
+   options:[{text:'Affirming the antecedent gives the consequent; denying the consequent gives denial of the antecedent — but NOT vice versa',ar:'استثناء عين المقدم ونقيض التالي'},{text:'Only affirming the antecedent is valid'},{text:'Any combination is valid'},{text:'Denying the antecedent gives the denial of the consequent'}],correct:0,
+   sharh:'In a لزومية متصلة (If P then Q): Valid: (1) affirm P → affirm Q. (2) deny Q → deny P. NOT valid: deny P (does not give deny Q), or affirm Q (does not give affirm P).'},
+  {topic:'قياس الخلف',arabic:'قياس الخلف: يُثبت المدعى بإبطال نقيضه',
+   question:'What is قياس الخلف (reductio ad absurdum)?',
+   options:[{text:'A syllogism built from premises all of which are false'},{text:'A compound syllogism that proves the claim by showing that assuming its negation leads to absurdity (محال)',ar:'إثبات المدعى بإبطال نقيضه'},{text:'An inductive argument from many particulars'},{text:'A syllogism using uncertain (ظني) premises'}],correct:1,
+   sharh:'قياس الخلف: establishes the claim (المدعى) by demonstrating that its negation (نقيضه) produces an impossibility (محال). Two conditional premises together entail the المدعى.'},
+  {topic:'الصناعات الخمس — Overview',arabic:'الصناعات الخمس: البرهان، الجدل، الخطابة، الشعر، المغالطة',
+   question:'What are the five logical arts (الصناعات الخمس) listed in the Mirqaat?',
+   options:[{text:'القياس، الاستقراء، التمثيل، الحدس، والتواتر'},{text:'البرهان، الجدل، الخطابة، الشعر، المغالطة',ar:'برهان، جدل، خطابة، شعر، مغالطة'},{text:'اليقين، الظن، الوهم، الشك، الجهل'},{text:'الحد التام، الناقص، الرسم التام، الناقص، والمصادرة'}],correct:1,
+   sharh:'(1) البرهان — from certain premises; produces يقين. (2) الجدل — from accepted/common premises; produces إلزام. (3) الخطابة — from plausible premises; produces ظن/إقناع. (4) الشعر — from imaginative premises; produces تخييل. (5) المغالطة — from deceptive premises; produces غلط.'},
+  {topic:'البرهان',arabic:'البرهان: قياس مؤلَّف من يقينيات',
+   question:'What type of premises must a برهان (demonstration) be built from?',
+   options:[{text:'مشهورات (widely accepted propositions)'},{text:'مقبولات (accepted by both parties)'},{text:'يقينيات (certain propositions) — بديهية or منتهية إلى بديهية',ar:'يقينيات: بديهية أو منتهية إليها'},{text:'Any true propositions regardless of how known'}],correct:2,
+   sharh:'البرهان = قياس مؤلَّف من يقينيات — whether بديهية (self-evident) or theoretical tracing back to self-evident truths. The six types of بديهيات: أوليات, فطريات, حدسيات, مشاهدات, تجريبيات, متواترات.'},
+  {topic:'البرهان — البديهيات الست',arabic:'البديهيات: أوليات، فطريات، حدسيات، مشاهدات، تجريبيات، متواترات',
+   question:'Which of the six بديهيات is described as propositions the intellect judges upon mere attention to the two terms?',
+   options:[{text:'الفطريات'},{text:'الأوليات (primary truths / axioms)',ar:'الأوليات'},{text:'التجريبيات'},{text:'الحدسيات'}],correct:1,
+   sharh:'الأوليات = قضايا يجزم بها العقل بمجرد تصور طرفيها دون حاجة إلى واسطة — the intellect judges immediately upon grasping the two terms. E.g. "الكل أعظم من الجزء".'},
+  {topic:'البرهان — اللمي والإني',arabic:'البرهان: لمي وإني',
+   question:'What is البرهان اللمي?',
+   options:[{text:'A proof from effect to cause (from bottom to top)'},{text:'A proof where the middle term is the cause (علة) for the truth of the conclusion in reality',ar:'الأوسط علة لثبوت الأكبر للأصغر'},{text:'A proof relying entirely on observation'},{text:'A proof using only accepted premises (مشهورات)'}],correct:1,
+   sharh:'البرهان اللمي = the middle term is the real cause (علة) of the major\'s being true of the minor in reality. البرهان الإني = the middle term is علة in the mind for knowing the حكم, but may actually be معلول in reality.'},
+  {topic:'الجدل',arabic:'الجدل: قياس من مشهورات أو مسلَّمات عند الخصم',
+   question:'What are the premises of الجدل (dialectic) composed of?',
+   options:[{text:'يقينيات (certain propositions) alone'},{text:'مشهورات (widely accepted) or مسلَّمات (conceded by the opponent) — صادقة كانت أو كاذبة',ar:'مشهورات أو مسلَّمات'},{text:'مخيَّلات (imaginative propositions)'},{text:'Sensory observations only'}],correct:1,
+   sharh:'الجدل = قياس مؤلَّف من مشهورات or مسلَّمات عند الخصم — whether true or false. Goal: إلزام الخصم or حفظ الرأي. It does not yield يقين because مشهورات may not be inherently certain.'},
+  {topic:'الخطابة',arabic:'الخطابة: قياس مفيد للظن من مقبولات',
+   question:'What is the purpose of الخطابة (rhetoric) in the context of the logical arts?',
+   options:[{text:'To produce يقين (certainty) in the audience'},{text:'To produce ظن (probable belief) and persuasion in listeners by using مقبولات (accepted premises)',ar:'إفادة الظن والإقناع'},{text:'To compose metrical speech for aesthetic effect'},{text:'To defeat the opponent in debate through logical necessity'}],correct:1,
+   sharh:'الخطابة = قياس مقدماته مقبولات أو مظنونات. Purpose: إقناع المخاطَب (convincing the addressee). Product is ظن, not يقين.'},
+  {topic:'الشعر',arabic:'القياس الشعري: مؤلَّف من مخيَّلات',
+   question:'What makes القياس الشعري (poetic syllogism) distinct from all other logical arts?',
+   options:[{text:'It uses only false premises'},{text:'Its premises are مخيَّلات (imaginative propositions) — regardless of their truth — which cause the soul to contract (قبض) or expand (بسط)',ar:'المخيَّلات الصادقة أو الكاذبة'},{text:'It requires metrical speech (وزن) according to علم الميزان'},{text:'It is built exclusively from divine speech'}],correct:1,
+   sharh:'القياس الشعري = مؤلَّف من مخيَّلات — imaginative propositions whether true or false. What matters is تأثير على النفس (effect on the soul), not truth.'},
+  {topic:'المغالطة السفسطة',arabic:'المغالطة: قياس فاسد من الوهميات',
+   question:'What is القياس السفسطي (sophistical/fallacious syllogism)?',
+   options:[{text:'A valid syllogism that yields false conclusions due to false premises only'},{text:'A syllogism built from وهميات (imaginary propositions that deceive) resembling true premises',ar:'وهميات مشابهة للحق'},{text:'An argument that uses religious texts as premises'},{text:'A rhetorical argument directed at uneducated masses'}],correct:1,
+   sharh:'السفسطة = قياس مؤلَّف من وهميات كاذبة مشابهة للصادق. Product: غلط (error). Main causes: سوء الفهم and اشتباه الكواذب بالصوادق.'},
+  {topic:'أسباب الغلط — Causes of Error',arabic:'أسباب الغلط ترجع إلى: سوء الفهم، واشتباه الكواذب بالصوادق',
+   question:'The Mirqaat reduces the causes of logical error (أسباب الغلط) to two primary sources. What are they?',
+   options:[{text:'Ignorance of vocabulary and ignorance of grammar'},{text:'سوء الفهم (misunderstanding) and اشتباه الكواذب بالصوادق (false premises resembling true ones)',ar:'سوء الفهم — اشتباه الكواذب بالصوادق'},{text:'Excessive use of مجاز and reliance on مشهورات'},{text:'Lack of logical training and poor memory'}],correct:1,
+   sharh:'Two primary causes of error: (1) سوء الفهم — from the وهم (imagination) mistaking false things for certain truths. (2) اشتباه الكواذب بالصوادق — confusing false propositions with true ones due to lexical or meaningful ambiguities.'},
+  {topic:'المغالطات الصورية',arabic:'من المغالطات الصورية: المصادرة على المطلوب',
+   question:'What is المصادرة على المطلوب (petitio principii / begging the question)?',
+   options:[{text:'Using a universal premise where a particular is needed'},{text:'Using the very claim to be proved as a premise — circular reasoning',ar:'جعل المطلوب نفسه مقدمة'},{text:'Converting the conclusion incorrectly'},{text:'Confusing cause and effect in the middle term'}],correct:1,
+   sharh:'المصادرة على المطلوب: the المطلوب (what is to be proved) is itself made a premise, creating circular reasoning. The conclusion is smuggled into the premises.'},
+  {topic:'الاستقراء والتمثيل',arabic:'الاستقراء: الحكم على كلي بتتبع أكثر الجزئيات',
+   question:'What does الاستقراء (induction) produce according to the Mirqaat?',
+   options:[{text:'يقين قطعي (absolute certainty)'},{text:'The strongest form of برهان'},{text:'الظن الغالب (probable belief) rather than يقين — because not all particulars may have been examined',ar:'ظن غالب لا يقين'},{text:'Nothing useful — it is rejected by the logicians'}],correct:2,
+   sharh:'الاستقراء = الحكم على كلي بتتبع أكثر الجزئيات. It produces ظن غالب, not يقين — because there may always be an unexamined particular breaking the rule (e.g. the crocodile moves its upper jaw). استقراء تام (exhaustive) yields يقين but is rare.'},
+  {topic:'التمثيل',arabic:'التمثيل: إثبات حكم في جزئي لوجوده في جزئي آخر لمعنى جامع',
+   question:'What is التمثيل (analogy) in logical terms?',
+   options:[{text:'Deducing from a universal to a particular'},{text:'Establishing a ruling in one particular (فرع) because it exists in another particular (أصل) on account of a shared common element (العلة)',ar:'إثبات حكم في فرع لوجوده في أصل بجامع'},{text:'Enumerating all individuals of a universal'},{text:'Converting a premise to reach the same conclusion from a different angle'}],correct:1,
+   sharh:'التمثيل = what الفقهاء call قياس. It establishes a ruling in a فرع based on an أصل via a shared معنى جامع (علة). Two main methods to establish the جامع: الدوران (co-variance) and السبر والتقسيم.'},
+  {topic:'المقولات العشر — Categories',arabic:'الأجناس العالية عشرة: الجوهر والمقولات التسع',
+   question:'What are the ten highest genera (أجناس عالية) according to the Mirqaat?',
+   options:[{text:'Only الجوهر and الكم and الكيف (three only)'},{text:'الجوهر plus the nine عرضيات: الكم، الكيف، الإضافة، الأين، الملك، الفعل، الانفعال، المتى، الوضع',ar:'جوهر + تسعة أعراض'},{text:'The five كليات plus their negations'},{text:'The four elements: نار، ماء، هواء، تراب'}],correct:1,
+   sharh:'The ten مقولات: (1) الجوهر, (2) الكم, (3) الكيف, (4) الإضافة, (5) الأين, (6) الملك, (7) الفعل, (8) الانفعال, (9) المتى, (10) الوضع. الجوهر is the موجود بلا محل; the other nine are أعراض requiring a محل.'},
+  {topic:'الجوهر',arabic:'الجوهر: الموجود لا في موضوع',
+   question:'How is الجوهر (substance) defined?',
+   options:[{text:'Everything that has physical extension'},{text:'The existent that is NOT in a subject (لا في موضوع) — it subsists by itself rather than in another',ar:'موجود لا في موضوع'},{text:'The existent that exists necessarily'},{text:'Only immaterial, purely spiritual beings'}],correct:1,
+   sharh:'الجوهر = الموجود الذي لا يقوم في موضوع — exists without depending on a subject to inhere in. الأعراض by contrast require a محل to subsist in. الواجب تعالى and His attributes are outside the ten مقولات.'},
+  {topic:'خاتمة — Three Parts of Every Science',arabic:'لكل علم ثلاثة أمور: الموضوع، المبادئ، المسائل',
+   question:'According to the خاتمة of the Mirqaat, every science has three parts. What are they?',
+   options:[{text:'الغاية، الموضوع، والمسائل'},{text:'الموضوع (subject-matter), المبادئ (principles), المسائل (problems/questions)',ar:'موضوع، مبادئ، مسائل'},{text:'الحد، الرسم، والقياس'},{text:'البديهي، النظري، والمصادرة'}],correct:1,
+   sharh:'Every science has: (1) الموضوع — what it investigates. (2) المبادئ — its foundational principles (بديهية or مسلَّمات). (3) المسائل — the questions it contains and attempts to prove with دليل.'},
+  {topic:'الرؤوس الثمانية',arabic:'الرؤوس الثمانية: الغرض، المنفعة، التسمية، المؤلف، مرتبته، موضوعه، قسمته، أنحاء التعليم',
+   question:'What is the seventh of the رؤوس الثمانية (eight heads) for introducing any book?',
+   options:[{text:'المؤلف (the author)'},{text:'المنفعة (the benefit)'},{text:'القسمة (the divisions/chapters) — the gateways of the book',ar:'القسمة: أبواب العلم'},{text:'الغرض (the purpose)'}],correct:2,
+   sharh:'The رؤوس الثمانية: (1) الغرض, (2) المنفعة, (3) التسمية, (4) المؤلف, (5) مرتبته, (6) من أي علم هو, (7) القسمة — chapters and divisions, (8) أنحاء التعليم — methods of teaching: التقسيم، التحليل، التحديد، والبرهان.'},
+  {topic:'النظر والمنطق — Purpose',arabic:'المنطق: قانون يعصم الذهن عن الخطأ في الفكر',
+   question:'The Mirqaat gives two reasons for calling logic both "المنطق" and "الميزان". What are they?',
+   options:[{text:'المنطق because it uses speech; الميزان because it is balanced and fair'},{text:'المنطق because the knower strengthens internal and external نطق; الميزان because it is the scale for weighing thoughts',ar:'نطق ظاهري وباطني — ميزان يوزن به الأفكار'},{text:'Both names are just historical conventions with no deep meaning'},{text:'المنطق from Arabic tradition; الميزان from Greek tradition only'}],correct:1,
+   sharh:'تسميته بالمنطق: for its effect on النطق الظاهري (external speech) AND النطق الباطني (internal intellection). تسميته بالميزان: because it is قسطاس للعقل توزن به الأفكار — a scale for weighing thoughts.'},
+  {topic:'فائدة — اليقين والظن في المنطق',arabic:'زعم قوم: المقدمات النقلية لا تستعمل في القياس البرهاني',
+   question:'What does the Mirqaat say about using transmitted (نقلي) premises in برهاني arguments?',
+   options:[{text:'Transmitted premises can never be used in برهان because they carry الظن'},{text:'The claim is wrongheaded — النقل when its شرائط are met and عقل is added gives certainty (قطع)',ar:'النقل مع شروطه وانضمام العقل يفيد القطع'},{text:'Transmitted premises are only for الجدل and خطابة, never برهان'},{text:'Transmitted premises are equivalent to حدسيات'}],correct:1,
+   sharh:'Some claim نقلي premises cannot be used in برهاني arguments. The Mirqaat responds: this is wrong. النقل يفيد القطع إذا روعي فيه شرائطه وانضم إليه العقل. Islamic scholarship combines نقل + عقل to achieve certainty in religious برهان.'}
+];
+
+const flashcards = [
+  {topic:'علم',front:'What are the 5 meanings of العلم in the Mirqaat?',back:'1. حصول صورة الشيء في العقل (form in intellect)\n2. الصورة الحاصلة (the form itself)\n3. الحاضر عند المدرك (present to perceiver)\n4. قبول النفس لتلك الصورة (soul\'s reception) — Mutakallimun\n5. الإضافة بين العالم والمعلوم (relation between knower/known)'},
+  {topic:'تصوُّر / تصديق',front:'What is التصوُّر and what is التصديق?',back:'التصوُّر: الإدراك الخالي عن الحكم\n(Perception without judgment)\n\nالتصديق: الحكم المقارِن للثلاثة\n(Assent = judgment accompanying three perceptions)\n\nتصديق requires THREE prior تصوُّرات:\n• موضوع • محمول • نسبة حكمية'},
+  {topic:'تصوُّر — أقسام',front:'What are the two types of تصوُّر?',back:'الضروري/البديهي: obtained without effort\n→ e.g. تصوُّر الحرارة والبرودة\n\nالنظري/الكسبي: requires فكر ونظر\n→ e.g. تصوُّر الجن والملائكة'},
+  {topic:'دلالة',front:'Define الدلالة and its six types',back:'الدلالة: كون الشيء بحيث يلزم من العلم به العلم بشيء آخر\n\nSix types:\nلفظية: وضعية | طبعية | عقلية\nغير لفظية: وضعية | طبعية | عقلية'},
+  {topic:'دلالة لفظية وضعية',front:'What are the three أنحاء of الدلالة اللفظية الوضعية?',back:'1. المطابقة: word → full موضوع له\n   e.g. "إنسان" → حيوان ناطق (whole)\n\n2. التضمُّن: word → PART of موضوع له\n   e.g. "إنسان" → حيوان (part)\n\n3. الالتزام: word → لازم بيِّن outside موضوع له\n   e.g. "إنسان" → قابل العلم والكتابة'},
+  {topic:'حقيقة / مجاز / منقول',front:'Distinguish حقيقة, مجاز, and المنقول',back:'الحقيقة: word in original موضوع له\n• علامة: تبادر الذهن بلا قرينة\n\nالمجاز: word beyond original placement WITH قرينة\n• علامة: صحة نفيه\n\nالمنقول: original موضوع له abandoned; new one adopted\n• Types: عرفي عام | شرعي | اصطلاحي'},
+  {topic:'المفرد والمركب',front:'How does علم الميزان define المفرد vs. المركب?',back:'المفرد: ما لا يُقصد بجزئه الدلالة على جزء معناه\n• e.g. "زيد" — the "ز" means nothing alone\n\nالمركب: ما يُقصد بجزئه الدلالة على جزء معناه\n• e.g. "زيد قائم" — each part independently meaningful'},
+  {topic:'الكليات الخمس',front:'List the five universals with their definitions',back:'1. الجنس: كلي على كثيرين مختلفي الحقائق — e.g. الحيوان\n2. النوع: كلي على كثيرين متفقي الحقائق — e.g. الإنسان\n3. الفصل: كلي في جواب أي شيء هو في ذاته — e.g. الناطق\n4. الخاصة: كلي خارج الحقيقة خاص بحقيقة واحدة — e.g. الضاحك\n5. العرض العام: كلي خارج الحقيقة مشترك بين حقائق — e.g. الماشي\n\nFirst 3 = ذاتيات; last 2 = عرضيات'},
+  {topic:'النسب الأربع',front:'What are the four relationships between two universals?',back:'1. التساوي: both predicated of exactly same things\n   e.g. الإنسان / الناطق\n\n2. التباين: nothing shared\n   e.g. الإنسان / الحجر\n\n3. عموم وخصوص مطلقاً: one wholly includes the other\n   e.g. الحيوان (broader) / الإنسان (narrower)\n\n4. عموم وخصوص من وجه: each broader in one area\n   e.g. الأبيض / الحيوان'},
+  {topic:'التعريفات',front:'Four types of تعريف — explain each',back:'1. الحد التام: جنس قريب + فصل قريب\n   e.g. "الحيوان الناطق" for إنسان\n\n2. الحد الناقص: فصل alone or جنس بعيد + فصل\n\n3. الرسم التام: جنس قريب + خاصة\n   e.g. "الحيوان الضاحك"\n\n4. الرسم الناقص: خاصة alone\n   e.g. "الضاحك"\n\n⚠ العرض العام alone NEVER works — لا يفيد التمييز'},
+  {topic:'القضية',front:'Define القضية and its primary division',back:'القضية: قول يحتمل الصدق والكذب\n\nPrimary division:\n• حملية: has موضوع ومحمول ورابطة\n  e.g. "زيد قائم"\n\n• شرطية:\n  - متصلة (luzūmiyya or ittifāqiyya)\n  - منفصلة (ḥaqīqiyya, māni al-jam, māni al-khuluww)'},
+  {topic:'المحصورات الأربع',front:'The four quantified propositions with their سُوَر',back:'كلية موجبة (A): كل ب ج\nكلية سالبة (E): لا شيء من ب ج\nجزئية موجبة (I): بعض ب ج\nجزئية سالبة (O): ليس بعض ب ج'},
+  {topic:'التناقض',front:'Eight conditions for valid تناقض (contradiction)',back:'وحدة: الموضوع، المحمول، المكان، الزمان، القوة والفعل، الشرط، الجزء والكل، الإضافة\n\n+ اختلاف الكم (one كلي, one جزئي)\n\nClassic pairs:\nA ↔ O | E ↔ I'},
+  {topic:'العكس المستوي',front:'Rules of simple conversion (عكس مستوي)',back:'E → E (كلية سالبة stays كلية سالبة)\nA → I (موجبة كلية → جزئية موجبة)\nI → I (جزئية موجبة → جزئية موجبة)\nO → ✗ (no valid converse)\n\nKey: A does NOT convert as A → A (overclaims)'},
+  {topic:'القياس الاقتراني — الأشكال الأربعة',front:'Four figures — position of الأوسط',back:'شكل 1: موضوع في صغرى، محمول في كبرى\n→ Conditions: إيجاب الصغرى + كلية الكبرى\n\nشكل 2: محمول في كليهما\n→ Conditions: اختلاف الكيف + كلية الكبرى → always سالبة\n\nشكل 3: موضوع في كليهما\n→ Conditions: إيجاب الصغرى + كليتها → always جزئية\n\nشكل 4: محمول في صغرى، موضوع في كبرى'},
+  {topic:'الصناعات الخمس',front:'Five logical arts — premises and products',back:'1. البرهان: يقينيات → يقين\n2. الجدل: مشهورات/مسلَّمات → إلزام\n3. الخطابة: مقبولات/مظنونات → ظن/إقناع\n4. الشعر: مخيَّلات → تخييل/تأثير نفسي\n5. المغالطة: وهميات كاذبة مشابهة → غلط'},
+  {topic:'البرهان — البديهيات',front:'The six types of certain premises (يقينيات)',back:'1. الأوليات: mere تصوُّر suffices — "الكل أعظم من الجزء"\n2. الفطريات: internal implicit قياس — "الأربعة زوج"\n3. الحدسيات: sudden intellectual insight\n4. المشاهدات: sense perception (ظاهرة وباطنة)\n5. التجريبيات: repeated observation → universal rule\n6. المتواترات: mass narration'},
+  {topic:'البرهان اللمي والإني',front:'Difference between لمي and إني برهان',back:'اللمي: middle term is علة for the conclusion in REALITY\n→ Cause → Effect\n→ "زيد محموم ← تعفُّن الأخلاط"\n\nالإني: middle term is علة in the MIND only\n→ Effect → Cause (in reasoning)\n→ "الأخلاط متعفنة ← زيد محموم"\n\nLmī is the stronger, more explanatory برهان'},
+  {topic:'الاستقراء والتمثيل',front:'Induction (استقراء) vs. Analogy (تمثيل)',back:'الاستقراء: judging a universal by tracing most particulars\n→ Product: ظن غالب (probable), not يقين\n→ Exception: استقراء تام → يقين (rare)\n\nالتمثيل: ruling in فرع based on أصل via shared جامع\n→ = قياس الفقهاء\n→ Methods: الدوران | السبر والتقسيم\n→ Product: ظن if premises are ظنية'},
+  {topic:'أسباب الغلط',front:'Main sources of logical error',back:'Two primary causes:\n1. سوء الفهم — misunderstanding\n2. اشتباه الكواذب بالصوادق — false resembling true\n\nLexical: الاشتراك اللفظي | المجاز as literal | ambiguous syntax\nMeaningful: treating عرضيات as ذاتيات | المصادرة | false analogy'},
+  {topic:'خاتمة',front:'Three parts every science has',back:'Every science has:\n1. الموضوع: what it investigates\n   e.g. Mizan → التصورات والتصديقات\n\n2. المبادئ: foundational principles\n   Either بديهيات or مسلَّمات\n\n3. المسائل: the problems it proves with دليل'}
+];
+
+const referenceData = [
+  {title:'Book 1 — العلم: Knowledge & Its Divisions',ar:'العلم وتقسيماته',content:`
+    <p><strong>Five Meanings of العلم:</strong></p>
+    <span class="def-arabic">حصول صورة الشيء في العقل — الصورة الحاصلة — الحاضر عند المدرك — قبول النفس — الإضافة بين العالم والمعلوم</span>
+    <p>The fourth meaning (قبول النفس) is attributed to جمهور المتكلمين.</p>
+    <p><strong>Primary Division:</strong></p>
+    <span class="def-arabic">العلم ينقسم: تصوُّر وتصديق</span>
+    <table><tr><th>Term</th><th>Arabic</th><th>Definition</th></tr>
+    <tr><td>Tasawwur</td><td class="ar-cell">تصوُّر</td><td>Perception without judgment</td></tr>
+    <tr><td>Tasdiq</td><td class="ar-cell">تصديق</td><td>Assent/judgment with three perceptions</td></tr></table>
+    <div class="example"><strong>Philosophers vs. al-Razi on تصديق:</strong><br>الحكماء: تصديق = إدراك النسبة الرابطية alone.<br>الرازي: تصديق = مجموع الإدراكات الثلاثة (موضوع + محمول + نسبة)</div>
+    <p><strong>Subtypes of تصوُّر:</strong></p>
+    <span class="def-arabic">الضروري: حاصل بلا نظر كالحرارة | النظري: يحتاج إلى فكر كتصوُّر الجن والملائكة</span>
+  `},
+  {title:'Book 2 — الدلالة: Signification',ar:'الدلالة وأقسامها',content:`
+    <p><strong>Technical Definition:</strong></p>
+    <span class="def-arabic">الدلالة: كون الشيء بحيث يلزم من العلم به العلم بشيء آخر</span>
+    <table><tr><th>Type</th><th>Sub-types</th></tr>
+    <tr><td>لفظية</td><td>وضعية, طبعية, عقلية</td></tr>
+    <tr><td>غير لفظية</td><td>وضعية, طبعية, عقلية</td></tr></table>
+    <p><strong>Three Types of لفظية وضعية:</strong></p>
+    <div class="example">المطابقة → full meaning | التضمُّن → part of meaning | الالتزام → بيِّن concomitant</div>
+    <p><strong>Condition for الالتزام:</strong> The لازم must be بيِّن (manifest).</p>
+    <table><tr><th>Type</th><th>Definition</th><th>Sign</th></tr>
+    <tr><td>حقيقة</td><td>word in original موضوع له</td><td>تبادر الذهن بلا قرينة</td></tr>
+    <tr><td>مجاز</td><td>word beyond original, with قرينة</td><td>صحة النفي عنه</td></tr>
+    <tr><td>منقول</td><td>original abandoned, new adopted</td><td>3 types: عرفي, شرعي, اصطلاحي</td></tr></table>
+  `},
+  {title:'Book 3 — الكليات الخمس: The Five Universals',ar:'الكليات الخمس والنسب',content:`
+    <table><tr><th>Universal</th><th>Key Feature</th><th>Example</th></tr>
+    <tr><td>الجنس</td><td>Predicated of things differing in حقيقة</td><td>الحيوان</td></tr>
+    <tr><td>النوع</td><td>Predicated of things sharing same حقيقة</td><td>الإنسان</td></tr>
+    <tr><td>الفصل</td><td>Answers "أي شيء هو في ذاته"</td><td>الناطق</td></tr>
+    <tr><td>الخاصة</td><td>Outside حقيقة; one species only</td><td>الضاحك</td></tr>
+    <tr><td>العرض العام</td><td>Outside حقيقة; multiple species</td><td>الماشي</td></tr></table>
+    <p><strong>Four relations between two كليّات:</strong></p>
+    <div class="example">1. التساوي: الإنسان / الناطق<br>2. التباين: الإنسان / الفرس<br>3. عموم وخصوص مطلقاً: الحيوان / الإنسان<br>4. عموم وخصوص من وجه: الأبيض / الحيوان</div>
+    <p><strong>Four types of كلي by existence:</strong></p>
+    <div class="example">1. ممتنع الأفراد | 2. ممكن لم يوجد: العنقاء | 3. وُجد فرد واحد: الشمس | 4. كثير الأفراد: الإنسان</div>
+  `},
+  {title:'Book 4 — التعريفات: Definitions',ar:'الحد والرسم',content:`
+    <span class="def-arabic">المعرِّف: ما يُحمل عليه لإفادة تصوُّره</span>
+    <table><tr><th>Type</th><th>Components</th><th>Example</th></tr>
+    <tr><td>حد تام</td><td>جنس قريب + فصل قريب</td><td>الحيوان الناطق</td></tr>
+    <tr><td>حد ناقص</td><td>فصل alone or جنس بعيد + فصل</td><td>الناطق</td></tr>
+    <tr><td>رسم تام</td><td>جنس قريب + خاصة</td><td>الحيوان الضاحك</td></tr>
+    <tr><td>رسم ناقص</td><td>خاصة alone</td><td>الضاحك</td></tr></table>
+    <p>⚠ العرض العام alone CANNOT define — لأنه لا يفيد التمييز.</p>
+  `},
+  {title:'Book 5 — القضايا: Propositions & Modalities',ar:'القضايا وجهاتها',content:`
+    <span class="def-arabic">القضية: قول يحتمل الصدق والكذب</span>
+    <p><strong>Primary division:</strong> حملية | شرطية (متصلة or منفصلة)</p>
+    <table><tr><th>Name</th><th>Formula</th><th>Marker</th></tr>
+    <tr><td>كلية موجبة</td><td>All A is B</td><td>كل</td></tr>
+    <tr><td>كلية سالبة</td><td>No A is B</td><td>لا شيء من</td></tr>
+    <tr><td>جزئية موجبة</td><td>Some A is B</td><td>بعض</td></tr>
+    <tr><td>جزئية سالبة</td><td>Some A is not B</td><td>ليس بعض</td></tr></table>
+    <p><strong>Eight simple modals:</strong></p>
+    <div class="example">1. ضرورية مطلقة 2. دائمة مطلقة 3. مشروطة عامة 4. عرفية عامة 5. وقتية مطلقة 6. منتشرة مطلقة 7. مطلقة عامة 8. ممكنة عامة → plus seven مركبات = 15 total</div>
+    <p><strong>التناقض — 8 required unities:</strong></p>
+    <div class="example">الموضوع | المحمول | المكان | الزمان | القوة والفعل | الشرط | الجزء والكل | الإضافة + اختلاف الكم</div>
+    <p><strong>العكس المستوي:</strong> E→E | A→I | I→I | O→✗</p>
+  `},
+  {title:'Book 6 — القياس: The Syllogism',ar:'القياس وأشكاله',content:`
+    <span class="def-arabic">القياس: قول مؤلَّف من قضايا يلزم عنها قول آخر</span>
+    <table><tr><th>Figure</th><th>Conditions</th><th>Conclusion</th></tr>
+    <tr><td>شكل 1 (أشرف)</td><td>إيجاب الصغرى + كلية الكبرى</td><td>كلية if both كلي</td></tr>
+    <tr><td>شكل 2</td><td>اختلاف الكيف + كلية الكبرى</td><td>Always سالبة</td></tr>
+    <tr><td>شكل 3</td><td>إيجاب الصغرى + كليتها</td><td>Always جزئية</td></tr>
+    <tr><td>شكل 4</td><td>Complex conditions</td><td>Variable</td></tr></table>
+    <div class="example"><strong>متصلة لزومية:</strong><br>Valid: Affirm P → Affirm Q | Deny Q → Deny P<br>Invalid: Deny P | Affirm Q</div>
+    <p><strong>قياس الخلف:</strong> Prove المدعى by showing its negation leads to محال.</p>
+  `},
+  {title:'Book 7 — الصناعات الخمس: Five Logical Arts',ar:'الصناعات الخمس',content:`
+    <table><tr><th>Art</th><th>Premises</th><th>Product</th></tr>
+    <tr><td>البرهان</td><td>يقينيات</td><td>يقين</td></tr>
+    <tr><td>الجدل</td><td>مشهورات / مسلَّمات</td><td>إلزام</td></tr>
+    <tr><td>الخطابة</td><td>مقبولات / مظنونات</td><td>ظن / إقناع</td></tr>
+    <tr><td>الشعر</td><td>مخيَّلات</td><td>تخييل</td></tr>
+    <tr><td>المغالطة</td><td>وهميات مشابهة للصادق</td><td>غلط</td></tr></table>
+    <p><strong>Six types of يقينيات for برهان:</strong></p>
+    <div class="example">1. الأوليات: تصوُّر terms alone suffices<br>2. الفطريات: internal implicit قياس<br>3. الحدسيات: sudden insight<br>4. المشاهدات: observation<br>5. التجريبيات: repeated experiment<br>6. المتواترات: mass narration</div>
+    <p>The Mirqaat defends using نقلي premises in برهان: النقل + شرائطه + انضمام العقل يفيد القطع.</p>
+  `},
+  {title:'Book 8 — المغالطات: Fallacies',ar:'المغالطات وأسباب الغلط',content:`
+    <p><strong>Two primary causes of غلط:</strong></p>
+    <div class="example">1. سوء الفهم (misunderstanding)<br>2. اشتباه الكواذب بالصوادق (false resembling true)</div>
+    <p><strong>Lexical fallacies:</strong></p>
+    <div class="example">• الاشتراك اللفظي: homonymy exploited in argument<br>• المجاز taken as literal<br>• Syntactic and morphological ambiguity</div>
+    <p><strong>Meaningful fallacies:</strong></p>
+    <div class="example">• أخذ العرضي مكان الذاتي<br>• المصادرة على المطلوب (begging the question)<br>• Confusing جزء العلة with the whole علة<br>• Applying الأولوية incorrectly</div>
+  `},
+  {title:'Book 9 — الاستقراء والتمثيل: Induction & Analogy',ar:'الاستقراء والتمثيل',content:`
+    <span class="def-arabic">الاستقراء: الحكم على كلي بتتبع أكثر الجزئيات</span>
+    <div class="example">Product: ظن غالب, not يقين (crocodile moves upper jaw — breaks the rule)<br>استقراء تام (exhaustive) → يقين, but rare</div>
+    <span class="def-arabic">التمثيل: إثبات حكم في فرع لوجوده في أصل بجامع</span>
+    <div class="example">= قياس الفقهاء<br>Two methods for establishing جامع:<br>الدوران (co-variance) | السبر والتقسيم (division and testing)</div>
+  `},
+  {title:'Book 10 — المقولات العشر: Ten Categories',ar:'المقولات العشر',content:`
+    <table><tr><th>#</th><th>Arabic</th><th>English</th><th>Example</th></tr>
+    <tr><td>1</td><td class="ar-cell">الجوهر</td><td>Substance</td><td>Body, soul</td></tr>
+    <tr><td>2</td><td class="ar-cell">الكم</td><td>Quantity</td><td>Length, number</td></tr>
+    <tr><td>3</td><td class="ar-cell">الكيف</td><td>Quality</td><td>Color, taste</td></tr>
+    <tr><td>4</td><td class="ar-cell">الإضافة</td><td>Relation</td><td>Fatherhood</td></tr>
+    <tr><td>5</td><td class="ar-cell">الأين</td><td>Place</td><td>Being in the house</td></tr>
+    <tr><td>6</td><td class="ar-cell">الملك</td><td>Having</td><td>Being armed</td></tr>
+    <tr><td>7</td><td class="ar-cell">الفعل</td><td>Action</td><td>Heating</td></tr>
+    <tr><td>8</td><td class="ar-cell">الانفعال</td><td>Being acted on</td><td>Being heated</td></tr>
+    <tr><td>9</td><td class="ar-cell">المتى</td><td>Time</td><td>In Ramadan</td></tr>
+    <tr><td>10</td><td class="ar-cell">الوضع</td><td>Position</td><td>Standing, sitting</td></tr></table>
+    <p>الجوهر = الموجود لا في موضوع. The other nine are أعراض requiring a محل. الواجب تعالى is OUTSIDE the ten مقولات.</p>
+  `},
+  {title:'Book 11 — الخاتمة: Conclusion',ar:'الخاتمة والرؤوس الثمانية',content:`
+    <p><strong>Three parts of every science:</strong></p>
+    <div class="example">1. الموضوع — what it investigates<br>2. المبادئ — foundational principles (بديهية or مسلَّمات)<br>3. المسائل — questions it proves with دليل</div>
+    <p><strong>الرؤوس الثمانية:</strong></p>
+    <table><tr><th>#</th><th>Name</th><th>Meaning</th></tr>
+    <tr><td>1</td><td>الغرض</td><td>Purpose</td></tr>
+    <tr><td>2</td><td>المنفعة</td><td>Benefit</td></tr>
+    <tr><td>3</td><td>التسمية</td><td>Title</td></tr>
+    <tr><td>4</td><td>المؤلِّف</td><td>Author</td></tr>
+    <tr><td>5</td><td>مرتبته</td><td>Rank among sciences</td></tr>
+    <tr><td>6</td><td>من أي علم هو</td><td>Classification</td></tr>
+    <tr><td>7</td><td>القسمة</td><td>Chapters/divisions</td></tr>
+    <tr><td>8</td><td>أنحاء التعليم</td><td>Teaching methods</td></tr></table>
+    <span class="def-arabic">غاية المنطق: الإصابة في الفكر وحفظ الرأي عن الخطأ في النظر</span>
+  `}
+];
+
+let currentMode='quiz', shuffledQ=[], currentQIdx=0;
+let score={correct:0,wrong:0}, answered=false;
+let fcIdx=0, fcFlipped=false;
+
+function init(){
+  shuffledQ=shuffle([...questions]);
+  currentQIdx=0; score={correct:0,wrong:0};
+  renderQuestion(); updateScore();
+}
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+  return arr;
+}
+
+function setMode(mode,btn){
+  currentMode=mode;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['quizSection','flashcardSection','referenceSection','resultsSection'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  ['scoreDisplay','progressWrap','progressLabel'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  if(mode==='quiz'){
+    ['quizSection','scoreDisplay','progressWrap','progressLabel'].forEach(id=>document.getElementById(id).classList.remove('hidden'));
+    init();
+  } else if(mode==='flashcard'){
+    document.getElementById('flashcardSection').classList.remove('hidden');
+    fcIdx=0; fcFlipped=false; renderFlashcard();
+  } else {
+    document.getElementById('referenceSection').classList.remove('hidden');
+    renderReference();
+  }
+}
+
+function renderQuestion(){
+  if(currentQIdx>=shuffledQ.length){showResults();return;}
+  answered=false;
+  const q=shuffledQ[currentQIdx];
+  document.getElementById('topicTag').textContent=q.topic;
+  document.getElementById('questionText').textContent=q.question;
+  const ar=document.getElementById('arabicText');
+  if(q.arabic){ar.textContent=q.arabic;ar.style.display='block';}
+  else{ar.style.display='none';}
+  const container=document.getElementById('optionsContainer');
+  container.innerHTML='';
+  const opts=q.options.map((o,i)=>({...o,idx:i}));
+  shuffle(opts).forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.className='option-btn';
+    if(opt.ar){btn.innerHTML=`<span class="ar">${opt.ar}</span><span class="en">${opt.text}</span>`;}
+    else{btn.textContent=opt.text;}
+    btn.onclick=()=>selectAnswer(opt.idx,btn,q);
+    container.appendChild(btn);
+  });
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('feedback').innerHTML='';
+  document.getElementById('nextBtn').classList.remove('show');
+  updateProgress();
+}
+
+function selectAnswer(idx,btn,q){
+  if(answered)return; answered=true;
+  document.querySelectorAll('.option-btn').forEach(b=>{
+    b.disabled=true;
+    const txt=b.querySelector('.en')?b.querySelector('.en').textContent:b.textContent;
+    const oi=q.options.findIndex(o=>o.text===txt);
+    if(oi===q.correct)b.classList.add('correct');
+  });
+  const isCorrect=idx===q.correct;
+  if(isCorrect){score.correct++;btn.classList.add('correct');}
+  else{score.wrong++;btn.classList.add('wrong');}
+  const fb=document.getElementById('feedback');
+  fb.className='feedback show '+(isCorrect?'correct-fb':'wrong-fb');
+  fb.innerHTML=`<div class="fb-title">${isCorrect?'✓ Correct!':'✗ Incorrect'}</div><div class="sharh-explain"><strong>من الشرح:</strong><br>${q.sharh}</div>`;
+  document.getElementById('nextBtn').classList.add('show');
+  updateScore();
+}
+function nextQuestion(){currentQIdx++;renderQuestion();}
+function updateProgress(){
+  const total=shuffledQ.length,done=currentQIdx;
+  document.getElementById('progressFill').style.width=(done/total*100)+'%';
+  document.getElementById('progressLabel').textContent=`Question ${done+1} of ${total}`;
+  document.getElementById('scoreLeft').textContent=total-done;
+}
+function updateScore(){
+  document.getElementById('scoreCorrect').textContent=score.correct;
+  document.getElementById('scoreWrong').textContent=score.wrong;
+}
+function showResults(){
+  document.getElementById('quizSection').classList.add('hidden');
+  document.getElementById('resultsSection').classList.remove('hidden');
+  const total=shuffledQ.length,pct=Math.round(score.correct/total*100);
+  document.getElementById('finalScore').textContent=pct+'%';
+  let msg='';
+  if(pct>=90)msg=`Excellent! ${score.correct}/${total} correct. Your mastery of المرقاة is strong.`;
+  else if(pct>=70)msg=`Good work! ${score.correct}/${total} correct. Review the sections you missed.`;
+  else if(pct>=50)msg=`${score.correct}/${total} correct. Go through the flashcards and reference then retry.`;
+  else msg=`${score.correct}/${total} correct. Start with flashcards and the reference section first.`;
+  document.getElementById('resultMsg').textContent=msg;
+}
+function restartQuiz(){
+  document.getElementById('resultsSection').classList.add('hidden');
+  document.getElementById('quizSection').classList.remove('hidden');
+  init();
+}
+
+function renderFlashcard(){
+  fcFlipped=false;
+  const fc=flashcards[fcIdx];
+  document.getElementById('fcTag').textContent=fc.topic;
+  document.getElementById('fcFront').innerHTML=`<div style="font-size:16px;font-weight:700;color:#1a1209;line-height:1.5;">${fc.front}</div>`;
+  document.getElementById('fcBack').innerHTML=`<div style="font-family:'Amiri',serif;font-size:14px;direction:ltr;text-align:left;color:#3a2a10;white-space:pre-line;line-height:1.7;">${fc.back}</div>`;
+  document.getElementById('fcFront').classList.remove('hidden');
+  document.getElementById('fcBack').classList.add('hidden');
+  document.getElementById('fcLabel').textContent=`Card ${fcIdx+1} of ${flashcards.length} — tap to reveal answer`;
+}
+function flipCard(){
+  fcFlipped=!fcFlipped;
+  document.getElementById('fcFront').classList.toggle('hidden',fcFlipped);
+  document.getElementById('fcBack').classList.toggle('hidden',!fcFlipped);
+  document.getElementById('fcLabel').textContent=`Card ${fcIdx+1} of ${flashcards.length} — ${fcFlipped?'answer revealed':'tap to reveal answer'}`;
+}
+function fcNext(){fcIdx=(fcIdx+1)%flashcards.length;renderFlashcard();}
+function fcPrev(){fcIdx=(fcIdx-1+flashcards.length)%flashcards.length;renderFlashcard();}
+
+function renderReference(){
+  document.getElementById('referenceSection').innerHTML=referenceData.map((sec,i)=>`
+    <div class="ref-section">
+      <div class="ref-header" onclick="toggleRef(${i})">
+        <span>${sec.title}</span>
+        <span class="ar-title">${sec.ar}</span>
+      </div>
+      <div class="ref-body" id="ref-${i}">${sec.content}</div>
+    </div>`).join('');
+  document.getElementById('ref-0').classList.add('open');
+}
+function toggleRef(i){document.getElementById('ref-'+i).classList.toggle('open');}
+
+init();
+</script>
+</body>
+</html>
